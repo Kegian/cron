@@ -6,6 +6,7 @@ private
     import std.algorithm : each, map;
     import std.array : array, split;
     import std.conv : to;
+    import std.datetime;
     import std.range : iota;
     import std.traits : isSomeString;
     import std.typecons : tuple;
@@ -140,3 +141,23 @@ unittest
     assert(num);
 }
 
+
+ubyte dow(DateTime dt)
+{
+    final switch (dt.dayOfWeek) with (DayOfWeek)
+    {
+        case mon: return 1;
+        case tue: return 2;
+        case wed: return 3;
+        case thu: return 4;
+        case fri: return 5;
+        case sat: return 6;
+        case sun: return 7;
+    }
+}
+
+
+unittest
+{
+    // TODO
+}

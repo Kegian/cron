@@ -4,4 +4,6 @@
 
 module cron;
 
-public import cron.parser : CronExpr, CronException;
+public import cron.parser :
+                    CronExpr, CronException,
+                    DateTime, Nullable;

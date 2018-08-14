@@ -6,10 +6,11 @@ private
     import std.algorithm : filter, each, map;
     import std.array : array, split;
     import std.conv : to;
+    import std.datetime;
     import std.range : iota;
     import std.regex : ctRegex, matchFirst, Captures;
     import std.traits : isSomeString, EnumMembers;
-    import std.typecons : tuple, Tuple;
+    import std.typecons : tuple, Tuple, Nullable;
 
     import cron.utils;
 }
@@ -169,6 +170,84 @@ struct CronExpr
 
         return cron;
     }
+
+
+    Nullable!DateTime getNext(DateTime current)
+    {
+        DateTime next = current;
+        next += 1.seconds;
+
+        uint ind = 0;
+        while (true)
+        {
+            // In case of infinit loop break the cycle
+            if (ind > 4 * 366)
+                return Nullable!DateTime.init;
+
+            // Find next valid month
+            if (!bitTest(months, next.month))
+            {
+                ind += next.daysInMonth;
+                next.add!"months"(1);
+                next.day = 1;
+                next.hour = 0;
+                next.minute = 0;
+                next.second = 0;
+                continue;
+            }
+
+            // Find next valid day of month
+            if (!bitTest(doms, next.day))
+            {
+                ind += 1;
+                next += 1.days;
+                next.hour = 0;
+                next.minute = 0;
+                next.second = 0;
+                continue;
+            }
+
+            // Find next valid day of week
+            if (!bitTest(dows, next.dow))
+            {
+                ind += 1;
+                next += 1.days;
+                next.hour = 0;
+                next.minute = 0;
+                next.second = 0;
+                continue;
+            }
+
+            // Find next valid hour
+            if (!bitTest(hours, next.hour))
+            {
+                next += 1.hours;
+                next.minute = 0;
+                next.second = 0;
+                continue;
+            }
+
+            // Find next valid minute
+            if (!bitTest(minutes, next.minute))
+            {
+                next += 1.minutes;
+                next.second = 0;
+                continue;
+            }
+
+            // Find next valid second
+            if (!bitTest(seconds, next.second))
+            {
+                next += 1.seconds;
+                continue;
+            }
+            
+           break; 
+        }
+
+        return Nullable!DateTime(next);
+    }
+
 
 private:
 
