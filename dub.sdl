@@ -1,0 +1,9 @@
+name "cron"
+description "Framework for working with Cron expressions"
+authors "Maxim Tyapkin"
+copyright "Copyright © 2018, Maxim Tyapkin"
+license "MIT"
+
+targetType "library"
+targetPath "out"
+targetName "cron"
