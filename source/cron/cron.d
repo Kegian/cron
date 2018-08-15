@@ -1,4 +1,67 @@
-module cron.parser;
+/**
+  * This framework provides parser of cron expressions and evaluator
+  * of next date and time of triggering parsed cron expressions.
+  *
+  * Cron expression consists of 6 required fields separated by white space
+  *
+  * Supported fields:
+  *
+  * Field           Allowed values      Special charachters
+  *
+  * Seconds         0-59                , - * /
+  * Minutes         0-59                , - * /
+  * Hours           0-23                , - * /
+  * Day-of-month    1-31                , - * / ?
+  * Month           1-12 or JAN-DEC     , - * /
+  * Day-of-week     1-7 or MON-SUN      , - * / ?
+  *
+  * Months names: JAN,FEB,MAR,APR,MAY,JUN,JUL,AUG,SEP,OCT,NOV,DEC
+  * Day-of-weeks names: MON,TUE,WED,THU,FRI,SAT,SUN
+  *
+  * Charachters:
+  *
+  * Asterisk (*):
+  *     is used for specify all values (eg. 'every minute' in minute field)
+  *
+  * Comma (,):
+  *     is used for to separate items of a list (eg. using "MON,WED,FRI"
+  *     in  the 6th field (day of week) means Mondays, Wednesdays, Fridays)
+  *
+  * Hyphen (-):
+  *     is used for define ranges (eg. 10-30 in 1st field means every second
+  *     between 10 and 30 inclusive)
+  *
+  * Slash (/):
+  *     is used for define step values, a/x = a, a+x, a+2x, a+3x, ...
+  *     (eg. 2/4 in hours means list of 2,6,10,14,18,22)
+  *     '*' mean minimal allowed value (eg. 0 for hours, 1 for months etc)
+  *
+  * Question mark (?):
+  *     is a synonym of '*' for day-of-week and day-of-month fields used
+  *     to explicitly indicate that days are set with other field
+  *
+  *
+  * NOTES:
+  *     - If both the 'Day-of-month' and 'Day-of-week' fields are
+  *       restricted (aren't '*'), next correct time will be when both(!)
+  *       fields match the conditions.
+  *       For example: `* * * 13 * FRI` expression will be satisfied only
+  *       on friday 13th.
+  *     - Ranges can be overflowing, it means range 'NOV-FEB' (NOV > FEB)
+  *       will expand in NOV,DEC,JAN,FEB
+  *
+  *
+  *
+  * Copyright:
+  *     Copyright (c) 2018, Maxim Tyapkin.
+  * Authors:
+  *     Maxim Tyapkin
+  * License:
+  *     This software is licensed under the terms of the MIT license.
+  *     The full terms of the license can be found in the LICENSE file.
+  */
+
+module cron.cron;
 
 
 private
@@ -16,24 +79,8 @@ private
 }
 
 
-/**
-  * Supports:
-  *
-  * Field           Allowed values      Special charachters
-  *
-  * Seconds         0-59                , - * /
-  * Minutes         0-59                , - * /
-  * Hours           0-23                , - * /
-  * Day-of-month    1-31                , - * / ?
-  * Month           1-12 or JAN-DEC     , - * /
-  * Day-of-week     1-7 or SUN-SAT      , - * / ?
-  *
-  */
-
-
 
 alias Interval = Tuple!(ubyte, "from", ubyte, "to");
-
 
 enum Range : Interval
 {
@@ -111,8 +158,14 @@ enum dowReg = r"(?P<"~Dow.list~r">([1-7],)*([1-7]))" ~ r"|" ~
               r"(?P<"~Dow.undef~r">[\?])" ~ r"|" ~
               r"(?P<"~Dow.any~r">[\*])";
 
-enum cronReg = r"^("~secReg~r")[\s]("~minReg~r")[\s]("~hrsReg~r")[\s]("~domReg~r")[\s]("~monReg~r")[\s]("~dowReg~r")$";
-
+enum cronReg = r"^(" ~
+                    secReg ~ r")[\s](" ~ 
+                    minReg ~ r")[\s](" ~
+                    hrsReg ~ r")[\s](" ~
+                    domReg ~ r")[\s](" ~
+                    monReg ~ r")[\s](" ~
+                    dowReg ~
+                r")$";
 
 
 enum secKeys = [EnumMembers!Sec];
@@ -161,6 +214,9 @@ struct CronExpr
         auto regexp = ctRegex!(cronReg);
         auto match = matchFirst(expr, regexp);
 
+        if (match.empty)
+            throw new CronException("Invalid cron expression");
+
         cron.parseSeconds!R(match);
         cron.parseMinutes!R(match);
         cron.parseHours!R(match);
@@ -171,7 +227,9 @@ struct CronExpr
         return cron;
     }
 
-
+    /**
+      * Get next date of execution after current
+      */
     Nullable!DateTime getNext(DateTime current)
     {
         DateTime next = current;
@@ -180,7 +238,7 @@ struct CronExpr
         uint ind = 0;
         while (true)
         {
-            // In case of infinit loop break the cycle
+            // Break loop after 4 years
             if (ind > 4 * 366)
                 return Nullable!DateTime.init;
 
@@ -459,6 +517,21 @@ private:
 }
 
 
+unittest
+{
+    auto c1 = CronExpr("30 0-1 12 1/2 NOV-FEB 2/2");
+    auto d1 = DateTime(2000, 6, 1, 10, 30, 0);
+    assert(c1.getNext(d1).get == DateTime(2000, 11, 7, 12, 00, 30));
+
+    auto c2 = CronExpr("0 0 0 29 FEB THU");
+    auto d2 = DateTime(2000, 1, 1, 0, 0, 0);
+    assert(c2.getNext(d2).isNull);
+}
+
+
+/**
+  * Cron exception
+  */
 class CronException : Exception
 {
     this(string msg, string file = __FILE__, size_t line = __LINE__)
@@ -468,7 +541,9 @@ class CronException : Exception
 }
 
 
-
+/**
+  * Replace names of dows and doms in expression
+  */
 auto replaceNames(R)(R expr, string names)
     if (isSomeString!R)
 {

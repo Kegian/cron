@@ -1,5 +1,6 @@
 name "cron"
-description "Framework for working with Cron expressions"
+description "Framework for working with cron expressions"
+homepage "https://github.com/Kegian/cron"
 authors "Maxim Tyapkin"
 copyright "Copyright © 2018, Maxim Tyapkin"
 license "MIT"

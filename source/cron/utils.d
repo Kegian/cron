@@ -1,5 +1,16 @@
-module cron.utils;
+/**
+  * This module contains some utils usefull for cron parser
+  *
+  * Copyright:
+  *     Copyright (c) 2018, Maxim Tyapkin.
+  * Authors:
+  *     Maxim Tyapkin
+  * License:
+  *     This software is licensed under the terms of the MIT license.
+  *     The full terms of the license can be found in the LICENSE file.
+  */
 
+module cron.utils;
 
 private
 {
@@ -13,7 +24,9 @@ private
 }
 
 
-
+/**
+  * Parse list of indexes to var (eg. "1,2,3,5,8")
+  */
 void parseList(T, R)(ref T val, R expr)
     if (isSomeString!R)
 {
@@ -33,6 +46,13 @@ unittest
 }
 
 
+/**
+  * Parse range of indexes to var (eg. "2-4" or "5-1")
+  *
+  * Note:
+  * If the range "a-b" is reversed (a > b), it's mean
+  * two ranges: "a-until", "from-b"
+  */
 void parseRange(T, R)(ref T val, R expr, ubyte from, ubyte until)
     if (isSomeString!R)
 {
@@ -68,6 +88,11 @@ unittest
 }
 
 
+/**
+  * Parse sequence of indexes to var (eg. "a/x" == "a, a+x, a+2x, ...")
+  *
+  * Note: "*" is synonym for "from"
+  */
 void parseSequence(T, R)(ref T val, R expr, ubyte from, ubyte until)
     if (isSomeString!R)
 {
@@ -95,7 +120,9 @@ unittest
 }
 
 
-
+/**
+  * Fill all allowed indexes to var
+  */
 void parseAny(T)(ref T val, ubyte from, ubyte until)
 {
     val = 0;
@@ -112,19 +139,27 @@ unittest
 }
 
 
-
+/**
+  * Get idx-th bit in var
+  */
 bool bitTest(T)(T num, ubyte idx)
 {
     return (num & (cast(T)1 << idx)) != 0;
 }
 
 
+/**
+  * Set idx-th bit in var to 1
+  */
 void bitSet(T)(ref T num, ubyte idx)
 {
     num = cast(T)(num | (cast(T)1 << idx));
 }
 
 
+/**
+  * Set idx-th bit in var to 0
+  */
 void bitClear(T)(ref T num, ubyte idx)
 {
     num = cast(T)(num & (~(cast(T)1 << idx)));
@@ -142,6 +177,9 @@ unittest
 }
 
 
+/**
+  * Convert std.datetime.DayOfWeek enum to dow index
+  */
 ubyte dow(DateTime dt)
 {
     final switch (dt.dayOfWeek) with (DayOfWeek)
@@ -159,5 +197,12 @@ ubyte dow(DateTime dt)
 
 unittest
 {
-    // TODO
+    //3 JAN 2000 - monday
+    assert(DateTime(2000, 1, 3).dow == 1);
+    assert(DateTime(2000, 1, 4).dow == 2);
+    assert(DateTime(2000, 1, 5).dow == 3);
+    assert(DateTime(2000, 1, 6).dow == 4);
+    assert(DateTime(2000, 1, 7).dow == 5);
+    assert(DateTime(2000, 1, 8).dow == 6);
+    assert(DateTime(2000, 1, 9).dow == 7);
 }
