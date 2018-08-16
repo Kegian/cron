@@ -57,8 +57,8 @@
   * Authors:
   *     Maxim Tyapkin
   * License:
-  *     This software is licensed under the terms of the MIT license.
-  *     The full terms of the license can be found in the LICENSE file.
+  *     This software is licensed under the terms of the BSD 3-clause license.
+  *     The full terms of the license can be found in the LICENSE.md file.
   */
 
 module cronexp.cronexp;

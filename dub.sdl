@@ -3,7 +3,7 @@ description "Framework for working with cron expressions"
 homepage "https://github.com/Kegian/cron"
 authors "Maxim Tyapkin"
 copyright "Copyright © 2018, Maxim Tyapkin"
-license "MIT"
+license "BSD 3-clause"
 
 targetType "library"
 targetPath "out"
