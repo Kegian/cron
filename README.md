@@ -1,4 +1,4 @@
-# cron
+# cronexp
 
 D framework providing parser of cron expressions and evaluator of
 next date and time of execution

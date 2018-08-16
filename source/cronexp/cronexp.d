@@ -61,7 +61,7 @@
   *     The full terms of the license can be found in the LICENSE file.
   */
 
-module cron.cron;
+module cronexp.cronexp;
 
 
 private
@@ -75,7 +75,7 @@ private
     import std.traits : isSomeString, EnumMembers;
     import std.typecons : tuple, Tuple, Nullable;
 
-    import cron.utils;
+    import cronexp.utils;
 }
 
 

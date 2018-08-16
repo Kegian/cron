@@ -1,4 +1,4 @@
-name "cron"
+name "cronexp"
 description "Framework for working with cron expressions"
 homepage "https://github.com/Kegian/cron"
 authors "Maxim Tyapkin"
@@ -7,4 +7,4 @@ license "MIT"
 
 targetType "library"
 targetPath "out"
-targetName "cron"
+targetName "cronexp"

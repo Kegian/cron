@@ -10,7 +10,7 @@
   *     The full terms of the license can be found in the LICENSE file.
   */
 
-module cron.utils;
+module cronexp.utils;
 
 private
 {

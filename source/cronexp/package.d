@@ -10,8 +10,8 @@
   *     The full terms of the license can be found in the LICENSE file.
   */
 
-module cron;
+module cronexp;
 
-public import cron.cron :
+public import cronexp.cronexp :
                     CronExpr, CronException,
                     DateTime, Nullable;
