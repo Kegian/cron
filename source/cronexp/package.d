@@ -12,6 +12,9 @@
 
 module cronexp;
 
-public import cronexp.cronexp :
-                    CronExpr, CronException,
-                    DateTime, Nullable;
+public
+{
+    import cronexp.cronexp : CronExpr, CronException;
+    import std.datetime : DateTime;
+    import std.typecons : Nullable;
+}
